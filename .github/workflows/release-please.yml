@@ -1,0 +1,28 @@
+on:
+  push:
+    branches:
+      - main
+name: release-please
+env:
+  CARGO_TERM_COLOR: always
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test --verbose
+
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          release-type: rust
+          package-name: lazy-pinned
+
+      - name: Publish
+        run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{secrets.CARGO_REGISTRY_TOKEN}}
+        if: ${{ steps.release.outputs.release_created }}
